@@ -17,134 +17,209 @@ package com.example.prototype.HuntAR;
  */
 
 
-import android.app.Activity;
-import android.app.ActivityManager;
-import android.content.Context;
-import android.os.Build;
-import android.os.Build.VERSION_CODES;
-import android.os.Bundle;
+
+import android.Manifest;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
-import android.view.Gravity;
-import android.view.MotionEvent;
+import android.os.Bundle;
 import android.widget.Toast;
 
 import com.example.prototype.R;
-import com.example.prototype.helpers.CameraPermissionHelper;
-import com.google.ar.core.Anchor;
-import com.google.ar.core.HitResult;
-import com.google.ar.core.Plane;
-import com.google.ar.sceneform.AnchorNode;
-import com.google.ar.sceneform.rendering.ModelRenderable;
-import com.google.ar.sceneform.ux.ArFragment;
-import com.google.ar.sceneform.ux.TransformableNode;
+import com.google.ar.core.AugmentedImage;
+import com.google.ar.core.AugmentedImageDatabase;
+import com.google.ar.core.Config;
+import com.google.ar.core.Frame;
+import com.google.ar.core.Session;
+import com.google.ar.core.TrackingState;
+import com.google.ar.core.exceptions.CameraNotAvailableException;
+import com.google.ar.core.exceptions.UnavailableApkTooOldException;
+import com.google.ar.core.exceptions.UnavailableArcoreNotInstalledException;
+import com.google.ar.core.exceptions.UnavailableDeviceNotCompatibleException;
+import com.google.ar.core.exceptions.UnavailableSdkTooOldException;
+import com.google.ar.sceneform.ArSceneView;
+import com.google.ar.sceneform.FrameTime;
+import com.google.ar.sceneform.Scene;
+import com.google.ar.sceneform.rendering.Light;
+import com.karumi.dexter.Dexter;
+import com.karumi.dexter.PermissionToken;
+import com.karumi.dexter.listener.PermissionDeniedResponse;
+import com.karumi.dexter.listener.PermissionGrantedResponse;
+import com.karumi.dexter.listener.PermissionRequest;
+import com.karumi.dexter.listener.single.PermissionListener;
 
-/**
- * This is an example activity that uses the Sceneform UX package to make common AR tasks easier.
- */
-public class ARActivity extends AppCompatActivity {
-    private static final String TAG = ARActivity.class.getSimpleName();
-    private static final double MIN_OPENGL_VERSION = 3.0;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Collection;
+import java.util.Collections;
 
-    private ArFragment arFragment;
-    private ModelRenderable andyRenderable;
+public class ARActivity extends AppCompatActivity implements Scene.OnUpdateListener {
+
+    private ArSceneView arView;
+    private Session session;
+    private boolean shouldConfigureSession = false;
 
     @Override
-    @SuppressWarnings({"AndroidApiChecker", "FutureReturnValueIgnored"})
-    // CompletableFuture requires api level 24
-    // FutureReturnValueIgnored is not valid
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        Log.d(TAG, "onCreate: STARTED");
-
-        if (!checkIsSupportedDeviceOrFinish(this)) {
-            return;
-        }
-
-
-        Log.d(TAG, "onCreate: CHECK DONE");
-        
-        
         setContentView(R.layout.activity_ux);
-        arFragment = (ArFragment) getSupportFragmentManager().findFragmentById(R.id.ux_fragment);
 
-        // When you build a Renderable, Sceneform loads its resources in the background while returning
-        // a CompletableFuture. Call thenAccept(), handle(), or check isDone() before calling get().
-        ModelRenderable.builder()
-                .setSource(this, R.raw.andy)
-                .build()
-                .thenAccept(renderable -> andyRenderable = renderable)
-                .exceptionally(
-                        throwable -> {
-                            Toast toast =
-                                    Toast.makeText(this, "Unable to load andy renderable", Toast.LENGTH_LONG);
-                            toast.setGravity(Gravity.CENTER, 0, 0);
-                            toast.show();
-                            return null;
-                        });
 
-        Log.d(TAG, "onCreate: RENDERABLE BUILT");
+        //View
+        arView = (ArSceneView)findViewById(R.id.arView);
 
-        arFragment.setOnTapArPlaneListener(
-                (HitResult hitResult, Plane plane, MotionEvent motionEvent) -> {
-                    if (andyRenderable == null) {
-                        return;
+        //Request Permision
+        Dexter.withActivity(this)
+                .withPermission(Manifest.permission.CAMERA)
+                .withListener(new PermissionListener() {
+                    @Override
+                    public void onPermissionGranted(PermissionGrantedResponse response) {
+                        setupSession();
                     }
 
-                    // Create the Anchor.
-                    Anchor anchor = hitResult.createAnchor();
-                    AnchorNode anchorNode = new AnchorNode(anchor);
-                    anchorNode.setParent(arFragment.getArSceneView().getScene());
+                    @Override
+                    public void onPermissionDenied(PermissionDeniedResponse response) {
+                        Toast.makeText( ARActivity.this, "camera permission required", Toast.LENGTH_LONG).show();
+                    }
 
-                    // Create the transformable andy and add it to the anchor.
-                    TransformableNode andy = new TransformableNode(arFragment.getTransformationSystem());
-                    andy.setParent(anchorNode);
-                    andy.setRenderable(andyRenderable);
-                    andy.select();
-                });
+                    @Override
+                    public void onPermissionRationaleShouldBeShown(PermissionRequest permission, PermissionToken token) {
 
-        Log.d(TAG, "onCreate: CLASSEND");
+                    }
+                }).check();
+
+        initSceneView();
+    }
+
+    private void initSceneView() {
+        arView.getScene().addOnUpdateListener(this);
+    }
+
+    private void setupSession() {
+        if (session == null) {
+            try {
+                session = new Session(this);
+            } catch (UnavailableArcoreNotInstalledException e) {
+                e.printStackTrace();
+            } catch (UnavailableApkTooOldException e) {
+                e.printStackTrace();
+            } catch (UnavailableSdkTooOldException e) {
+                e.printStackTrace();
+            } catch (UnavailableDeviceNotCompatibleException e) {
+                e.printStackTrace();
+            }
+            shouldConfigureSession = true;
+        }
+        if (shouldConfigureSession) {
+            configSession();
+            shouldConfigureSession = false;
+            arView.setupSession(session);
+        }
+
+        try {
+            session.resume();
+            arView.resume();
+        } catch (CameraNotAvailableException e) {
+            e.printStackTrace();
+            session = null;
+            return;
+        }
+    }
+
+    private void configSession()  {
+        Config config = new Config(session);
+        if(!buildDatabase(config)) {
+            Toast.makeText(this,"Error database",Toast.LENGTH_LONG).show();
+        }
+        config.setUpdateMode(Config.UpdateMode.LATEST_CAMERA_IMAGE);
+        config.setFocusMode(Config.FocusMode.AUTO);
+        session.configure(config);
+    }
+
+    private boolean buildDatabase(Config config) {
+        AugmentedImageDatabase augmentedImageDatabase;
+        //Bitmap bitmap = loadImage("lion");
+        //if(bitmap == null)
+        //    return false;
+
+        try {
+            InputStream inputStream = getAssets().open("test.imgdb");
+            augmentedImageDatabase = AugmentedImageDatabase.deserialize(session,inputStream);
+            config.setAugmentedImageDatabase(augmentedImageDatabase);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return true;
+    }
+
+    private Bitmap loadImage( String name) {
+        try {
+            InputStream is = getAssets().open(name + ".jpg");
+            return BitmapFactory.decodeStream(is);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+
+    @Override
+    public void onUpdate(FrameTime frameTime) {
+        Frame frame = arView.getArFrame();
+
+        //Toast.makeText(this,frame.getLightEstimate().toString(), Toast.LENGTH_LONG).show();
+        Collection<AugmentedImage> updateAugmentedImg = frame.getUpdatedTrackables(AugmentedImage.class);
+
+        for (AugmentedImage image:updateAugmentedImg) {
+            if (image.getTrackingState() == TrackingState.TRACKING) {
+                if (image.getName().equals("lion")) {
+                    MyARNode node = new MyARNode(this,R.raw.lion);
+                    node.setImage(image);
+                    arView.getScene().addChild(node);
+                }
+                else if (image.getName().equals("dino")) {
+                    MyARNode node = new MyARNode(this,R.raw.dino);
+                    node.setImage(image);
+                    arView.getScene().addChild(node);
+                }
+            }
+            if (image.getTrackingState() == TrackingState.STOPPED) {
+            }
+        }
+
     }
 
     @Override
     protected void onResume() {
         super.onResume();
+        Dexter.withActivity(this)
+                .withPermission(Manifest.permission.CAMERA)
+                .withListener(new PermissionListener() {
+                    @Override
+                    public void onPermissionGranted(PermissionGrantedResponse response) {
+                        setupSession();
+                    }
 
-        // ARCore requires camera permission to operate.
-        if (!CameraPermissionHelper.hasCameraPermission(this)) {
-            CameraPermissionHelper.requestCameraPermission(this);
-            return;
-        }
+                    @Override
+                    public void onPermissionDenied(PermissionDeniedResponse response) {
+                        Toast.makeText( ARActivity.this, "camera permission required", Toast.LENGTH_LONG).show();
+                    }
+
+                    @Override
+                    public void onPermissionRationaleShouldBeShown(PermissionRequest permission, PermissionToken token) {
+
+                    }
+                }).check();
 
     }
 
-    /**
-     * Returns false and displays an error message if Sceneform can not run, true if Sceneform can run
-     * on this device.
-     *
-     * <p>Sceneform requires Android N on the device as well as OpenGL 3.0 capabilities.
-     *
-     * <p>Finishes the activity if Sceneform can not run
-     */
-    public static boolean checkIsSupportedDeviceOrFinish(final Activity activity) {
-        if (Build.VERSION.SDK_INT < VERSION_CODES.N) {
-            Log.e(TAG, "Sceneform requires Android N or later");
-            Toast.makeText(activity, "Sceneform requires Android N or later", Toast.LENGTH_LONG).show();
-            activity.finish();
-            return false;
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if (session != null) {
+            arView.pause();
+            session.pause();
         }
-        String openGlVersionString =
-                ((ActivityManager) activity.getSystemService(Context.ACTIVITY_SERVICE))
-                        .getDeviceConfigurationInfo()
-                        .getGlEsVersion();
-        if (Double.parseDouble(openGlVersionString) < MIN_OPENGL_VERSION) {
-            Log.e(TAG, "Sceneform requires OpenGL ES 3.0 later");
-            Toast.makeText(activity, "Sceneform requires OpenGL ES 3.0 or later", Toast.LENGTH_LONG)
-                    .show();
-            activity.finish();
-            return false;
-        }
-        return true;
     }
 }
