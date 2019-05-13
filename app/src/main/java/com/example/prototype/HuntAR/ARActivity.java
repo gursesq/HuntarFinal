@@ -22,8 +22,10 @@ import android.Manifest;
 import android.content.res.AssetManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.os.Environment;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
@@ -42,9 +44,11 @@ import com.google.ar.core.exceptions.UnavailableDeviceNotCompatibleException;
 import com.google.ar.core.exceptions.UnavailableSdkTooOldException;
 import com.google.ar.sceneform.AnchorNode;
 import com.google.ar.sceneform.ArSceneView;
+import com.google.ar.sceneform.Camera;
 import com.google.ar.sceneform.FrameTime;
 import com.google.ar.sceneform.Node;
 import com.google.ar.sceneform.Scene;
+import com.google.ar.sceneform.Sun;
 import com.google.ar.sceneform.rendering.Light;
 import com.karumi.dexter.Dexter;
 import com.karumi.dexter.PermissionToken;
@@ -59,24 +63,56 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 
 public class ARActivity extends AppCompatActivity implements Scene.OnUpdateListener {
 
+    private static final String TAG = "ARActivity";
+
     private ArSceneView arView;
     private Session session;
     private boolean shouldConfigureSession = false;
-    private MyARNode lionNode;
-    private MyARNode dinoNode;
+    private HashMap<String, Integer> IDmap;
+    private String[] files;
+    private String filepath;
+    private File folder;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_ux);
 
+        Dexter.withActivity(this)
+                .withPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE);
+
+        Dexter.withActivity(this)
+                .withPermission(Manifest.permission.READ_EXTERNAL_STORAGE);
+
+        folder = new File(Environment.getExternalStorageDirectory() +
+                File.separator + "images");
+        boolean success = true;
+        if (!folder.exists()) {
+            success = folder.mkdir();
+        }
+        if (success) {
+            //add images to file
+            toaster("folder was created");
+        } else {
+           //kill activity folder not created
+            toaster("folder was not created");
+        }
+
+        filepath = "animals";
+
+        IDmap = new HashMap<String, Integer>();
+        IDmap.put("dino.jpg", R.raw.dino);
+        IDmap.put("lion.jpg", R.raw.lion);
+
 
         //View
         arView = (ArSceneView)findViewById(R.id.arView);
+        arView.setLightEstimationEnabled(false);
 
         //Request Permision
         Dexter.withActivity(this)
@@ -98,25 +134,14 @@ public class ARActivity extends AppCompatActivity implements Scene.OnUpdateListe
                     }
                 }).check();
 
-        //deletes all nodes from screen
-        Button btnClear = findViewById(R.id.btnClear);
-        btnClear.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                List<Node> list = new ArrayList<>(arView.getScene().getChildren());
-                for ( Node node : list) {
-                    if ( node instanceof AnchorNode && ((AnchorNode) node).getAnchor() != null ) {
-                        ((AnchorNode) node).getAnchor().detach();
-                        ((AnchorNode) node).setParent(null);
-                    }
-                }
-            }
-        });
+
+
 
         initSceneView();
     }
 
     private void initSceneView() {
+        arView = (ArSceneView)findViewById(R.id.arView);
         arView.getScene().addOnUpdateListener(this);
     }
 
@@ -159,6 +184,7 @@ public class ARActivity extends AppCompatActivity implements Scene.OnUpdateListe
         }
         config.setUpdateMode(Config.UpdateMode.LATEST_CAMERA_IMAGE);
         config.setFocusMode(Config.FocusMode.AUTO);
+        config.setLightEstimationMode(Config.LightEstimationMode.DISABLED);
         session.configure(config);
     }
 
@@ -167,21 +193,23 @@ public class ARActivity extends AppCompatActivity implements Scene.OnUpdateListe
         AugmentedImageDatabase augmentedImageDatabase;
         augmentedImageDatabase = new AugmentedImageDatabase(session);
 
-        String filepath = getIntent().getStringExtra("filepath");
-        File dir = new File(filepath);
-        File[] files = dir.listFiles();
+        AssetManager manager = getAssets();
+        try {
+            files = manager.list(filepath);
 
-
-        Bitmap bitmap = loadImage("lion");
-        if(bitmap == null)
+        } catch (IOException e) {
+            e.printStackTrace();
+            Log.d(TAG, "buildDatabase: could not create file");
             return false;
-        augmentedImageDatabase.addImage("lion",bitmap);
+        }
 
-        Bitmap bitmap2 = loadImage("dino");
-        if(bitmap2 == null)
-            return false;
-        augmentedImageDatabase.addImage("dino",bitmap2);
-
+        for ( int i = 0; i < files.length; i++ ) {
+            Bitmap bitmap = loadImage( filepath +"/"+ files[i]);
+            if (bitmap == null)
+                return false;
+            System.out.println(files[i]);
+            augmentedImageDatabase.addImage(files[i], bitmap);
+        }
 
         config.setAugmentedImageDatabase(augmentedImageDatabase);
 
@@ -191,7 +219,7 @@ public class ARActivity extends AppCompatActivity implements Scene.OnUpdateListe
     //buildDatabase helper method, creates bitmap of given image and name
     private Bitmap loadImage( String name) {
         try {
-            InputStream is = getAssets().open(name + ".jpg");
+            InputStream is = getAssets().open(  name);
             return BitmapFactory.decodeStream(is);
         } catch (IOException e) {
             e.printStackTrace();
@@ -204,25 +232,30 @@ public class ARActivity extends AppCompatActivity implements Scene.OnUpdateListe
     public void onUpdate(FrameTime frameTime) {
         Frame frame = arView.getArFrame();
 
+
         Collection<AugmentedImage> updateAugmentedImg = frame.getUpdatedTrackables(AugmentedImage.class);
 
         //adds the tracked nodes as a child to the scene with anchor at center of image
         for (AugmentedImage image:updateAugmentedImg) {
             if (image.getTrackingState() == TrackingState.TRACKING) {
-                if (image.getName().equals("lion")) {
-                    lionNode = new MyARNode(this,R.raw.lion);
-                    lionNode.setImage(image);
-                    arView.getScene().addChild(lionNode);
-
-                }
-                if (image.getName().equals("dino")) {
-                    dinoNode = new MyARNode(this,R.raw.dino);
-                    dinoNode.setImage(image);
-                    arView.getScene().addChild(dinoNode);
+                for ( int i = 0; i < files.length; i++ ) {
+                    if (image.getName().equals(files[i])) {
+                        MyARNode node = new MyARNode(this, IDmap.get(files[i]));
+                        node.setImage(image);
+                        arView.getScene().addChild(node);
+                    }
                 }
             }
             if (image.getTrackingMethod() == AugmentedImage.TrackingMethod.LAST_KNOWN_POSE) {
-
+                List<Node> list = new ArrayList<>(arView.getScene().getChildren());
+                for ( Node node : list ) {
+                    if ( node instanceof AnchorNode && ((MyARNode)node).getImage().getName().equals(image.getName())) {
+                        if ( ((AnchorNode) node).getAnchor() != null ) {
+                            ((AnchorNode) node).getAnchor().detach();
+                            ((AnchorNode) node).setParent(null);
+                        }
+                    }
+                }
             }
         }
 
