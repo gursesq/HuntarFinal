@@ -22,12 +22,12 @@ public class MyARNode extends AnchorNode {
     private static CompletableFuture<ModelRenderable> modelRenderableCompletableFuture;
 
     public MyARNode(Context context, int modelId) {
-        if (modelRenderableCompletableFuture == null) {
+
             modelRenderableCompletableFuture = ModelRenderable.builder()
                     .setRegistryId("my_model")
                     .setSource(context,modelId)
                     .build();
-        }
+
     }
 
     public void setImage(AugmentedImage image) {
@@ -43,6 +43,7 @@ public class MyARNode extends AnchorNode {
         }
 
         setAnchor(image.createAnchor(image.getCenterPose()));
+        setName(image.getName());
 
         Node node = new Node();
         Pose pose = Pose.makeTranslation(0.0f,0.0f,0.25f);

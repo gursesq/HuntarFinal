@@ -4,11 +4,19 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".HuntAR.ARActivity">
+    tools:context=".HuntAR.ARActivity"
+    android:orientation="vertical"
+    android:layout_gravity="bottom">
 
   <com.google.ar.sceneform.ArSceneView
       android:layout_width="match_parent"
       android:layout_height="match_parent"
       android:id="@+id/arView"/>
+
+  <Button
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:id="@+id/btnClear"
+      android:text="clear"/>
 
 </FrameLayout>
