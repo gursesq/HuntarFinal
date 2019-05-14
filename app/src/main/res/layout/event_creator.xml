@@ -11,13 +11,14 @@
         android:orientation="horizontal"
         android:weightSum="100">
 
-        <TextView
+        <EditText
+            android:id="@+id/txtEventName"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_weight="25"
             android:padding="16dp"
-            android:textSize="35dp"
-            android:text="CreatAR"
-            android:layout_weight="25"/>
+            android:text="Event Name"
+            android:textSize="35dp" />
 
         <Button
             android:layout_width="0dp"
@@ -71,10 +72,10 @@
             android:text="Description"/>
 
         <EditText
+            android:id="@+id/txtDate"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:id="@+id/txtDate"
-            android:text="End Date(optional)"/>
+            android:text="dd/MM/yyyy (optional)" />
 
         <EditText
             android:layout_width="match_parent"

@@ -1,154 +1,141 @@
 <?xml version="1.0" encoding="utf-8"?>
-<?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context=".User.Profile">
+    android:layout_height="match_parent">
 
-    <RelativeLayout
-        android:id="@+id/rellay1"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:paddingBottom="20dp"
-        android:background="@drawable/grad">
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="132dp"
+        android:background="#4682B4"
+        android:orientation="horizontal"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" >
 
-        <RelativeLayout
-            android:id="@+id/imgUser"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerHorizontal="true"
-            android:layout_marginTop="25dp"
-            android:background="@drawable/circle_border">
+        <ImageView
+            android:id="@+id/imgProfile"
+            android:layout_width="191dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:background="@drawable/profile" />
 
-            <ImageView
-                android:layout_width="120dp"
-                android:layout_height="120dp"
-                android:background="@drawable/jenna"/>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="64dp"
+            android:layout_weight="2"
+            android:gravity="top"
+            android:orientation="vertical">
 
-        </RelativeLayout>
+
+            <TextView
+                android:id="@+id/txtUsername"
+                android:layout_width="match_parent"
+                android:layout_height="131dp"
+                android:text="Username"
+                android:textSize="40dp" />
+            <TextView
+                android:layout_width="match_parent"
+                android:id="@+id/txtEmsil"
+                android:layout_height="131dp"
+                android:text="Email"
+                android:textSize="40dp"/>
+
+        </LinearLayout>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="424dp"
+        android:layout_height="53dp"
+        android:layout_marginTop="188dp"
+        android:background="#4682B4"
+        android:orientation="horizontal"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
 
         <TextView
-            android:id="@+id/txtUserName"
+            android:id="@+id/textView"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@+id/imgUser"
-            android:layout_centerHorizontal="true"
-            android:text="User Name"
-            android:layout_marginTop="15dp"
-            android:fontFamily="sans-serif-light"
-            android:textSize="32sp"
-            android:textColor="@color/white"
-            />
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:gravity=""
+            android:text="  COMPLETED EVENTS"
+            android:textColor="#FFFFFF"
+            android:textSize="24dp" />
+
+        <Spinner
+            android:id="@+id/spinner"
+            android:layout_width="wrap_content"
+            android:layout_height="72dp"
+            android:layout_weight="1" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="420dp"
+        android:layout_height="44dp"
+        android:layout_marginTop="266dp"
+        android:background="#86B7C3"
+        android:orientation="horizontal"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <ImageView
+            android:layout_width="35dp"
+            android:layout_height="match_parent"
+            android:src="@drawable/ic_action_puzzle_icon" />
 
         <TextView
-            android:id="@+id/txtEMail"
+            android:id="@+id/textView3"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@+id/txtUserName"
-            android:layout_centerHorizontal="true"
-            android:text="dakota@bilkent.edu.tr"
-            android:layout_marginTop="10dp"
-            android:textAllCaps="true"
-            android:fontFamily="sans-serif"
-            android:textSize="11sp"
-            android:textColor="@color/black"
-            />
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:gravity=""
+            android:text="   MY COLLECTION"
+            android:textSize="22dp"
+            android:textStyle="bold" />
+    </LinearLayout>
 
-        <ImageButton
-            android:id="@+id/iconSettings"
-            android:layout_width="35dp"
-            android:layout_height="35dp"
-            android:layout_alignParentRight="true"
-            android:layout_marginRight="12dp"
-            android:layout_marginTop="10dp"
-            android:src="@drawable/ic_settings_black_24dp"
-            android:background="@null"
-            android:text="100% Transparent Background"
-            android:scaleType="fitCenter"
-            />
+    <ScrollView
+        android:layout_width="414dp"
+        android:layout_height="321dp"
+        android:layout_marginTop="310dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
 
-        <ImageButton
-            android:id="@+id/iconHelpButton"
-            android:layout_width="35dp"
-            android:layout_height="35dp"
-            android:layout_below="@+id/iconSettings"
-            android:layout_alignParentRight="true"
-            android:layout_marginRight="12dp"
-            android:layout_marginTop="7dp"
-            android:src="@drawable/ic_help_outline_black_24dp"
-            android:background="@null"
-            android:text="100% Transparent Background"
-            android:scaleType="fitCenter"
-            />
+        <GridLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:columnCount="3">
 
-        <ImageButton
-            android:id="@+id/iconLogOut"
-            android:layout_width="35dp"
-            android:layout_height="35dp"
-            android:layout_marginLeft="12dp"
-            android:layout_marginTop="10dp"
-            android:src="@drawable/Logout_exit_2"
-            android:background="@null"
-            android:text="100% Transparent Background"
-            android:scaleType="fitCenter"
-            />
-
-    </RelativeLayout>
+        </GridLayout>
+    </ScrollView>
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/rellay1"
-        android:orientation="horizontal">
+        android:layout_height="95dp"
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="1dp"
+        android:orientation="horizontal"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
 
-        <RelativeLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@color/button1"
-            android:layout_gravity="center"
-            android:layout_weight="1"
-            android:padding="5dp"
-            android:gravity="center">
+        <Button
+            android:id="@+id/btnExplorar"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_alignParentTop="false"
+            android:layout_weight="0.5"
+            android:text="ExplorAR" />
 
-            <Button
-                android:id="@+id/buttonCompletedEvents"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Completed
-  Events"
-                android:background="@color/button1"
-                android:textColor="@color/white"
-                android:fontFamily="sans-serif-light"
-                android:textSize="19sp"
-                />
-
-        </RelativeLayout>
-
-        <RelativeLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@color/button2"
-            android:layout_gravity="center"
-            android:layout_weight="1"
-            android:padding="5dp"
-            android:gravity="center">
-
-            <Button
-                android:id="@+id/buttonMyCollection"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="My
-  Collectıon"
-                android:background="@color/button2"
-                android:textColor="@color/white"
-                android:fontFamily="sans-serif-light"
-                android:textSize="19sp"
-                />
-
-        </RelativeLayout>
-
+        <Button
+            android:id="@+id/btnEventCreator"
+            style="@style/Widget.AppCompat.Button"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="0.5"
+            android:text="CreatAR" />
     </LinearLayout>
 
-</RelativeLayout>
+</android.support.constraint.ConstraintLayout>

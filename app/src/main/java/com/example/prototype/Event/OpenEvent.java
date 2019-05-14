@@ -11,7 +11,7 @@ public class OpenEvent extends MyEvent {
     //consturctrors
 
     public OpenEvent( MyEvent event, boolean bool) {
-        super(event.getName(),event.getDate(),event.getDistance());
+        super(event.getName(),event.getDate(),event.getDistance(),event.getDescription());
         super.isFollowed = bool;
     }
 

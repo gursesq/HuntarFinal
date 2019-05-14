@@ -12,7 +12,7 @@ import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import com.example.prototype.HuntAR.MapsActivity;
+import com.example.prototype.HuntAR.MapActivity;
 import com.example.prototype.Event.MyEvent;
 import com.example.prototype.Event.OpenEvent;
 import com.example.prototype.R;
@@ -59,7 +59,7 @@ public class MySimpleArrayAdapter extends ArrayAdapter<String> {
                 btnPlay.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        Intent intent = new Intent( getContext(), MapsActivity.class);
+                        Intent intent = new Intent( getContext(), MapActivity.class);
                         getContext().startActivity(intent);
                     }
                 });
