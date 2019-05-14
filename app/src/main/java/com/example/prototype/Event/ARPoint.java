@@ -2,6 +2,8 @@ package com.example.prototype.Event;
 
 import android.net.Uri;
 
+//an arpoint which will hold an image and a location and a name, these will be later used to display
+//these points on the map and put correct models on correct images in the ARActivity
 public class ARPoint {
 
     //porperties

@@ -15,19 +15,17 @@ import com.google.ar.sceneform.rendering.ModelRenderable;
 
 import java.util.concurrent.CompletableFuture;
 
-
+//an extended anchornode that deals with rendering lag and holds its related augmentedimage
 public class MyARNode extends AnchorNode {
 
     private AugmentedImage image;
     private static CompletableFuture<ModelRenderable> modelRenderableCompletableFuture;
 
     public MyARNode(Context context, int modelId) {
-
             modelRenderableCompletableFuture = ModelRenderable.builder()
                     .setRegistryId("my_model")
                     .setSource(context,modelId)
                     .build();
-
     }
 
     public void setImage(AugmentedImage image) {

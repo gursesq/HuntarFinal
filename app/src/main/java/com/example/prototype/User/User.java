@@ -8,6 +8,7 @@ import java.io.Serializable;
 import java.net.URL;
 import java.util.ArrayList;
 
+//a user class that holds user properties, gets initialized from database when user logs in
 public class User implements Serializable {
 
     private String name;

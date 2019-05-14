@@ -66,6 +66,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
+//A class that reads images from a folder creates an augmented image database
+//and then is able to anchor related models on these images when they are detected by the camera
 public class ARActivity extends AppCompatActivity implements Scene.OnUpdateListener {
 
     private static final String TAG = "ARActivity";

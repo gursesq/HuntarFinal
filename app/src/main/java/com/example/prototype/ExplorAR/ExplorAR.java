@@ -31,6 +31,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 
+//gets events from database and puts them in the listview, then the user can follow these events or
+//choose to play one of them
 public class ExplorAR extends AppCompatActivity {
     private FirebaseDatabase mFirebaseDatabase;
     private FirebaseAuth mAuth;

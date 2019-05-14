@@ -32,6 +32,7 @@ import java.net.URI;
 import java.net.URL;
 import java.util.ArrayList;
 
+//An activity class where the user can sign up and create a new account
 public class SignupScreen extends AppCompatActivity {
 
     private FirebaseAuth mAuth;

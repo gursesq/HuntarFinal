@@ -17,6 +17,7 @@ import com.example.prototype.Event.MyEvent;
 import com.example.prototype.Event.OpenEvent;
 import com.example.prototype.R;
 
+//an adapter that inflates the proper layouts for the events in the list according to their properties
 public class MySimpleArrayAdapter extends ArrayAdapter<String> {
         private final Context context;
         private ArrayList<MyEvent> values;

@@ -44,7 +44,6 @@ public class CreatorAdapter extends ArrayAdapter {
         btnTrash.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                EventCreator.remove(position);
             }
         });
 

@@ -22,6 +22,7 @@ import com.google.android.gms.common.GoogleApiAvailability;
 import static com.example.prototype.HuntAR.Constants.PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION;
 import static com.example.prototype.HuntAR.Constants.PERMISSIONS_REQUEST_ENABLE_GPS;
 
+//gets the permissions, loads the necessary files and starts LoginScreen activity
 public class MainActivity extends AppCompatActivity {
 
     private static final int MY_CAMERA_REQUEST_CODE = 100;
@@ -33,6 +34,8 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        getLocationPermission();
 
         if (isServicesOK()) {
             init();

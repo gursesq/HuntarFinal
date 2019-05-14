@@ -5,6 +5,7 @@ import com.google.firebase.database.FirebaseDatabase;
 
 import java.util.Date;
 
+//an event class that holds the event properties
 public class MyEvent implements Comparable {
 
     //properties

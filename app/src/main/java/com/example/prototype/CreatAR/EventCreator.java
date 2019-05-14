@@ -40,6 +40,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 
+//a class that lets the user create an event and publish it (arpoints part does not work yet)
 public class EventCreator extends AppCompatActivity {
 
     private static final String TAG = "EventCreator";

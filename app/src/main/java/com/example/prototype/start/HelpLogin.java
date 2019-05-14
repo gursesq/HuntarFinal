@@ -9,6 +9,7 @@ import android.widget.Button;
 
 import com.example.prototype.R;
 
+//a class that displays a help text
 public class HelpLogin extends AppCompatActivity {
 
 

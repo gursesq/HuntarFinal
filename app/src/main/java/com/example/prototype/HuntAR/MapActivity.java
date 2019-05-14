@@ -2,6 +2,7 @@ package com.example.prototype.HuntAR;
 
 import android.Manifest;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationListener;
@@ -11,14 +12,18 @@ import android.support.v4.app.ActivityCompat;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
+import android.view.View;
+import android.widget.Button;
 import android.widget.Toast;
+import com.example.prototype.R;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.*;
+//import com.google.android.gms.internal.zzbck;
 //import com.karumi.dexter.Dexter;
 
 import android.*;
@@ -30,12 +35,14 @@ import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 
+import java.io.InputStream;
 import java.util.ArrayList;
 
 /**
  * Created by User on 14/5/2019.
  */
 
+//parts of code taken from developers.google.net
 public class MapActivity extends AppCompatActivity implements OnMapReadyCallback , LocationListener{
 
 
@@ -57,6 +64,24 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
     private GoogleMap mMap;
     private FusedLocationProviderClient mFusedLocationProviderClient;
     private ArrayList<LatLng> latList;
+
+
+    @Override
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_map);
+
+        Button btnGoToARActivity = findViewById(R.id.btnGoToARActivity);
+        btnGoToARActivity.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(MapActivity.this,ARActivity.class);
+                startActivity(intent);
+            }
+        });
+
+        getLocationPermission();
+    }
 
 
     @Override
@@ -83,14 +108,19 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         findMyLocation();
 
-        Location lastLoc = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-        latitude = lastLoc.getLatitude();
-        longitude = lastLoc.getLongitude();
+        //sets the global longitude and lattitude to users current location
+        //Location lastLoc = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+        //latitude = lastLoc.getLatitude();
+        //longitude = lastLoc.getLongitude();
 
 
+        //the coordinates in this list is added as markers to the map, in the future this list can
+        //be filled from database
         latList = new ArrayList<LatLng>();
-        //mMap.addMarker(new MarkerOptions().position(new LatLng(location.getLatitude(), location.getLongitude())).title("It's Me!"));
-        latList.add(new LatLng(latitude,longitude));
+        //speed cafe
+        latList.add(new LatLng(39.866498,32.748600));
+        //odeon
+        latList.add(new LatLng(39.876041,32.752353));
 
 
         for ( LatLng lt : latList) {
@@ -100,14 +130,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
 
 
 
-    @Override
-    protected void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_map);
-
-        getLocationPermission();
-    }
-
+    //adds the given coordinate as a marker to the map
     public void addMarker( LatLng latLng) {
         MarkerOptions markerOptions = new MarkerOptions();
 
@@ -125,6 +148,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         mMap.addMarker(markerOptions);
     }
 
+    //sets the camera(the view of map) to the device's current position
     private void getDeviceLocation() {
         Log.d(TAG, "getDeviceLocation: getting the devices current location");
 
@@ -156,11 +180,13 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         }
     }
 
+    //moves the view on map to the given location with given zoom
     private void moveCamera(LatLng latLng, float zoom) {
         Log.d(TAG, "moveCamera: moving the camera to: lat: " + latLng.latitude + ", lng: " + latLng.longitude);
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, zoom));
     }
 
+    //initializes mapfragment
     private void initMap() {
         Log.d(TAG, "initMap: initializing map");
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
@@ -168,6 +194,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         mapFragment.getMapAsync(MapActivity.this);
     }
 
+    //asks for permission to reach device location
     private void getLocationPermission() {
         Log.d(TAG, "getLocationPermission: getting location permissions");
         String[] permissions = {Manifest.permission.ACCESS_FINE_LOCATION,
@@ -197,6 +224,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
     }
 
 
+    //sets the global longitude and lattitude to current location
     private Location findMyLocation() {
         mMap.clear();
 
@@ -223,7 +251,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
     }
 
 
-
+    //checks if the required permissions are available
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
                                            @NonNull int[] grantResults) {
@@ -249,13 +277,11 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         }
     }
 
+    //sets the global longitude and lattitude to current location when the location changes(user moves)
     @Override
     public void onLocationChanged(Location location) {
-
         latitude = location.getLatitude();
         longitude = location.getLongitude();
-        //mMap.addMarker(new MarkerOptions().position(new LatLng(location.getLatitude(), location.getLongitude())).title("It's Me!"));
-
     }
 
     @Override
